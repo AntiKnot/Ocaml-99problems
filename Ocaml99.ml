@@ -380,4 +380,33 @@ let test_permutation =
 let () = print_n_list (permutation [1;3;3;5;4]);;
 let () = printf "%B\n" (test_permutation);;
 
- 
+
+(* OCaml equivalent of Python generators https://stackoverflow.com/a/28356215/10217249 *)
+(* Combination https://en.wikipedia.org/wiki/Combination *)
+
+let foo lst =
+  (* foo [1;2;3;4] == [[1;2];[1;3];[1;4]] *)
+  List.map ((fun x y->[x;y])  (List.hd lst)) (List.tl lst)
+
+(* let bar lst = 
+  (* bar [1;2;3]  == [ [[1];[2;3]]; [[2];[1;3]]; [[3];[1;2]] ] *)
+  [lst]] *)
+
+let test_foo =
+  let result = foo [1;2;3;4] in
+  let expect = [[1;2];[1;3];[1;4]] in
+  (compare result expect) == 0
+
+let extract lst = 
+  let rec aux acc lst = 
+    match lst with
+    | [] -> acc
+    | _::tl -> aux (acc@(foo lst)) tl in
+    aux [] lst
+
+let test_extract =
+  let result = extract [1;2;3] in
+  let expect = [[1;2];[1;3];[2;3]] in
+  (compare result expect) == 0
+
+let () = printf "%B\n" (test_extract)
