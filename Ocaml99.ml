@@ -70,6 +70,16 @@ let flatten l =
     | One x :: t -> aux (x::acc) t
     | Many l:: t -> aux (aux  acc l) t in 
     rev (aux [] l)
-
 let test_flatten = compare (flatten [One "a"; Many [One "b"; Many [One "c" ;One "d"]; One "e"]])  (["a"; "b"; "c"; "d"; "e"]) == 0
 let () = printf "%B\n" (test_flatten)
+
+let flatten_two l = 
+  let rec aux acc t  = 
+  match t with
+  | [] -> acc
+  | One x::t -> aux (acc@[x]) t
+  | Many l::t -> aux (aux  acc l) t in
+  aux [] l
+
+let test_flatten_two = compare (flatten_two [One "a"; Many [One "b"; Many [One "c" ;One "d"]; One "e"]])  (["a"; "b"; "c"; "d"; "e"]) == 0
+let () = printf "%B\n" (test_flatten_two)
