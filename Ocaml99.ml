@@ -381,8 +381,13 @@ let () = print_n_list (permutation [1;3;3;5;4]);;
 let () = printf "%B\n" (test_permutation);;
 
 
-(* OCaml equivalent of Python generators https://stackoverflow.com/a/28356215/10217249 *)
-(* Combination https://en.wikipedia.org/wiki/Combination *)
+(*
+Generate the combinations of K distinct objects chosen from the N elements of a list. (medium)
+In how many ways can a committee of 3 be chosen from a group of 12 people? We all know that there are C(12,3) = 220 possibilities (C(N,K) denotes the well-known binomial coefficients). For pure mathematicians, this result may be great. But we want to really generate all the possibilities in a list.
+
+OCaml equivalent of Python generators https://stackoverflow.com/a/28356215/10217249
+Combination https://en.wikipedia.org/wiki/Combination
+*)
 
 let foo lst =
   (* foo [1;2;3;4] == [[1;2];[1;3];[1;4]] *)
@@ -391,7 +396,6 @@ let foo lst =
 (* let bar lst = 
   (* bar [1;2;3]  == [ [[1];[2;3]]; [[2];[1;3]]; [[3];[1;2]] ] *)
   [lst]] *)
-
 let test_foo =
   let result = foo [1;2;3;4] in
   let expect = [[1;2];[1;3];[1;4]] in
@@ -410,3 +414,60 @@ let test_extract =
   (compare result expect) == 0
 
 let () = printf "%B\n" (test_extract)
+
+(*  what `|>` means? https://stackoverflow.com/questions/30493644/ocaml-operator *)
+
+(* 
+let extract k l = 
+  let rec extr i = function
+   | [] -> [] 
+   | _::_ when i = 0 -> []
+   (* i=1 [1;2;3]->[[1];[2];[3]] *)
+   | _::_ as xs when i = 1 -> List.map (fun x -> [x]) xs
+   (* | hd::tl -> List.map (fun x -> hd::x) (extr (i-1) tl) |> List.append (extr k tl) *)
+   | hd::tl ->  (List.map (fun x -> hd::x) (extr (i-1) tl)) |> List.append (extr k tl) 
+in
+extr k l 
+
+let test_extract_2th = 
+  let result = extract  2 [1;2;3] in
+  let expect = [[2;3];[1;2];[1;3]] in
+  (compare result expect) == 0
+
+let () = printf "test_extract_2th: %B\n" (test_extract_2th)
+*)
+
+let extract k l = 
+  let rec extr k list =
+    if k <= 0 then [[]]
+    else match list with
+      | [] -> []
+      | hd :: tl ->
+          let with_hd = List.map (fun l -> hd :: l) (extr (k - 1) tl) in
+          let without_hd = extr k tl in
+          with_hd @ without_hd
+    in 
+    extr k l
+
+let test_extract_1th = 
+  let result = extract  1 [1;2;3] in
+  let expect = [[1];[2];[3]] in
+  (compare result expect) == 0
+
+let () = printf "test_extract_1th: %B\n" (test_extract_1th)
+
+
+let test_extract_3th = 
+  let result = extract  3 [1;2;3] in
+  let expect = [[1;2;3]] in
+  (compare result expect) == 0
+
+let () = printf "test_extract_3th: %B\n" (test_extract_3th)
+
+let test_extract_4th = 
+  let result = extract  3 [1;2;3] in
+  let expect = [[1;3;2]] in
+  (compare result expect) != 0
+
+let () = printf "test_extract_4th: %B\n" (test_extract_4th)
+
