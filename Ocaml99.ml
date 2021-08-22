@@ -471,3 +471,127 @@ let test_extract_4th =
 
 let () = printf "test_extract_4th: %B\n" (test_extract_4th)
 
+(* 27. Group the elements of a set into disjoint subsets. (medium)
+In how many ways can a group of 9 people work in 3 disjoint subgroups of 2, 3 and 4 persons? Write a function that generates all the possibilities and returns them in a list.
+Generalize the above function in a way that we can specify a list of group sizes and the function will return a list of groups. 
+
+Two extract combine
+*)
+
+(* let extract k l = 
+  let rec extr rest k = function
+  | [] -> []
+  | _ when k = 0 -> []
+  | hd::tl when k = 1 -> ([hd],rest@tl)::(extr (hd::rest) 1 tl)
+  | hd::tl -> List.map (fun x -> hd::(fst x),(snd x)) (extr rest (k-1) tl) |> List.append (extr (hd::rest) k tl)
+  in 
+  extr [] k l
+
+let group l kl = 
+  let rec grp l = function
+  | [] -> [[]]
+  | k::tl -> 
+      extract k l |> List.map (fun (cs,rest) -> grp rest tl |> List.map (fun y -> cs::y)) |> List.flatten
+  in
+  grp l kl  *)
+
+
+(* 28. Sorting a list of lists according to length of sublists. (medium)
+We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
+
+Again, we suppose that a list contains elements that are lists themselves. But this time the objective is to sort the elements of this list according to their length frequency; i.e., in the default, where sorting is done ascendingly, lists with rare lengths are placed first, others with a more frequent length come later. *)
+
+(* https://en.wikipedia.org/wiki/Prime_number *)
+
+
+
+let is_prime n =
+  let rec is_not_divisor d = 
+    d*d>n || ((n mod d <> 0) && (is_not_divisor (d+1))) 
+  in
+  n <> 1 && is_not_divisor 2
+
+let test_is_prime3 = 
+  let result = is_prime 3 in
+  let expect = true in
+  (compare result expect) == 0
+
+let () = printf "test_is_prime: %B\n" (test_is_prime3)
+let test_is_prime4 = 
+  let result = is_prime 4 in
+  let expect = false in
+  (compare result expect) == 0
+
+let () = printf "test_is_prime: %B\n" (test_is_prime4)
+let test_is_prime7 =
+  let result = is_prime 7 in
+  let expect = true in
+  (compare result expect) == 0
+
+let () = printf "test_is_prime: %B\n" (test_is_prime7)
+
+(* 32. Determine the greatest common divisor of two positive integer numbers. (medium) *)
+(* https://en.wikipedia.org/wiki/Greatest_common_divisor *)
+
+let rec gcd a b = 
+  match b with
+  | 0 -> a
+  | _ -> gcd b (a mod b)
+
+let test_gcd =
+  let result = gcd 6 12 in
+  let expect = 6 in
+  (compare result expect) == 0
+
+let () = printf "test_gcd: %B\n" (test_gcd)
+
+let test_gcd2 =
+  let result = gcd 20536 7826 in
+  let expect = 2 in
+  (compare result expect) == 0
+let () = printf "test_gcd2: %B\n" (test_gcd2)
+
+
+(* 33. Determine whether two positive integer numbers are coprime. (easy) *)
+(* https://en.wikipedia.org/wiki/Coprime_integers *)
+
+let is_coprime m n =
+  gcd m n = 1 
+
+let test_is_coprime =
+  let result = is_coprime 2 3 in
+  let expect = true in
+  (compare result expect) == 0
+
+let () = printf "test_is_coprime: %B\n" (test_is_coprime)
+
+let test_is_coprime2 =
+  let result = is_coprime 2 4 in
+  let expect = false in
+  (compare result expect) == 0
+
+let () = printf "test_is_coprime2: %B\n" (test_is_coprime2)
+
+(* 34. Calculate Euler's totient function phi(m). (medium) *)
+let etf_phi m = 
+  let rec phi n m = 
+    match n with
+    |  1 -> 1
+    |  x -> (if is_coprime x m then 1 else 0 ) + (phi (n-1) m)
+  in
+  phi m m
+
+let test_etf_phi =
+  let result = etf_phi 10 in
+  let expect = 4 in
+  (compare result expect) == 0
+
+let () = printf "test_etf_phi: %B\n" (test_etf_phi)
+
+let test_etf_phi2 =
+  let result = etf_phi 13 in
+  let expect = 12 in
+  (compare result expect) == 0
+
+let () = printf "test_etf_phi2: %B\n" (test_etf_phi2)
+
