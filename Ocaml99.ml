@@ -498,18 +498,17 @@ let group l kl =
 
 (* 28. Sorting a list of lists according to length of sublists. (medium)
 We suppose that a list contains elements that are lists themselves. The objective is to sort the elements of this list according to their length. E.g. short lists first, longer lists later, or vice versa.
-
 Again, we suppose that a list contains elements that are lists themselves. But this time the objective is to sort the elements of this list according to their length frequency; i.e., in the default, where sorting is done ascendingly, lists with rare lengths are placed first, others with a more frequent length come later. *)
 
+(* 31. Determine whether a given integer number is prime. (medium) *)
 (* https://en.wikipedia.org/wiki/Prime_number *)
 
-
-
-let is_prime n =
+let is_prime :int -> bool 
+= fun n ->
   let rec is_not_divisor d = 
     d*d>n || ((n mod d <> 0) && (is_not_divisor (d+1))) 
   in
-  n <> 1 && is_not_divisor 2
+  n <> 1 && is_not_divisor 2;;
 
 let test_is_prime3 = 
   let result = is_prime 3 in
@@ -552,7 +551,8 @@ let test_gcd2 =
 let () = printf "test_gcd2: %B\n" (test_gcd2)
 
 
-(* 33. Determine whether two positive integer numbers are coprime. (easy) *)
+(* 33. Determine whether two positive integer numbers are coprime. (easy) 
+Two numbers are coprime if their greatest common divisor equals 1. *)
 (* https://en.wikipedia.org/wiki/Coprime_integers *)
 
 let is_coprime m n =
@@ -568,30 +568,156 @@ let () = printf "test_is_coprime: %B\n" (test_is_coprime)
 let test_is_coprime2 =
   let result = is_coprime 2 4 in
   let expect = false in
-  (compare result expect) == 0
+  assert ((compare result expect) == 0)
 
-let () = printf "test_is_coprime2: %B\n" (test_is_coprime2)
+(* let () = printf "test_is_coprime2: %B\n" (test_is_coprime2) *)
 
 (* 34. Calculate Euler's totient function phi(m). (medium) *)
-let etf_phi m = 
+let euler_totient m = 
   let rec phi n m = 
     match n with
     |  1 -> 1
     |  x -> (if is_coprime x m then 1 else 0 ) + (phi (n-1) m)
   in
-  phi m m
+  phi (m-1) m
 
-let test_etf_phi =
-  let result = etf_phi 10 in
-  let expect = 4 in
-  (compare result expect) == 0
+let () = assert ((compare (euler_totient 10) 4) == 0)
+let () = assert ((compare (euler_totient 13) 12) == 0)
 
-let () = printf "test_etf_phi: %B\n" (test_etf_phi)
+(* 35. Determine the prime factors of a given positive integer. (medium) *)
+(* https://en.wikipedia.org/wiki/Integer_factorization *)
+(* 315 
+1 2 3 -> 3,105
+1 2 3 -> 3,35
+1 2 3 4 5 -> 5,7
+1 2 3 4 5 6 7 -> 7,1
+is_prime && is_divisor
+end 
+[3;3;5;7]
+*)
+let prime_factors n =
+  let rec pf acc m p= 
+    match m with
+    | 1 -> acc
+    | m -> if m mod p = 0 && is_prime p then pf (p::acc) (m / p) 1 else pf acc m (p + 1)
+  in 
+  List.rev (pf [] n 1)
 
-let test_etf_phi2 =
-  let result = etf_phi 13 in
-  let expect = 12 in
-  (compare result expect) == 0
+let () = assert (compare (prime_factors 315) [3;3;5;7] == 0);;
+let () = assert (compare (prime_factors 10) [2;5] == 0);;
 
-let () = printf "test_etf_phi2: %B\n" (test_etf_phi2)
+(* 36. Determine the prime factors of a given positive integer (2). (medium)
+Construct a list containing the prime factors and their multiplicity. Hint: The problem is similar to problem Run-length encoding of a list (direct solution). *)
 
+(* sorted list, accumulate, match *)
+
+(* let encode2 lst = 
+  let rec aux acc prev count lst = 
+  match prev,count,lst with 
+  | _,(x,n),[] -> acc@[(x,n)]
+  | p,(x,n),hd::tl -> if (compare p hd)==0
+    then aux acc hd (hd,(n+1)) tl 
+    else aux (acc@[(x,n)]) hd (hd,1) tl in
+  aux [] (List.hd lst) (List.hd lst,0) lst;; *)
+let encode_swap lst = 
+  let rec iter acc lst = 
+    match lst with
+    | []->acc
+    | (n,x)::tl ->iter ((x,n)::acc) tl 
+  in
+  List.rev (iter [] lst);;
+
+let prime_factors_count n =
+  let rec pf acc m p= 
+    match m with
+    | 1 -> acc
+    | m -> if m mod p = 0 && is_prime p then pf (p::acc) (m / p) 1 else pf acc m (p + 1)
+  in 
+  (pf [] n 1) |> List.rev |> encode |> encode_swap;;
+
+let () = assert (compare (prime_factors_count 315) [(3,2);(5,1);(7,1)] == 0);;
+let () = assert (compare (prime_factors_count 13) [(13,1)] == 0);;
+
+(* 37. Calculate Euler's totient function φ(m) (improved). (medium)
+See problem "Calculate Euler's totient function φ(m)" for the definition of Euler's totient function. If the list of the prime factors of a number m is known in the form of the previous problem then the function phi(m) can be efficiently calculated as follows: Let [(p1, m1); (p2, m2); (p3, m3); ...] be the list of prime factors (and their multiplicities) of a given number m. Then φ(m) can be calculated with the following formula: *)
+(* item =(p_x,m_x) product = p_x^m_x *)
+let rec power m n =
+  match  n with
+  | 0 -> 1
+  | 1 -> m
+  | _ -> m * (power m (n-1));;
+
+let item (p,m) = 
+  (p-1) * (power p (m-1));;
+  
+let rec accumulate f acc sequence =
+  match sequence with
+  | [] -> acc
+  | x::xs -> f x (accumulate f acc xs);;
+
+let product_series lst = 
+  accumulate ( * ) 1 lst;;
+
+let euler_totient_improved m =
+  (* todo 如何对单个item进行管道处理而不是对整个list处理后向后传递 *)
+ (prime_factors_count m) |> List.map item|> product_series
+
+let () = assert (compare (euler_totient_improved 10) 4 == 0);;
+let () = assert (compare (euler_totient_improved 13) 12 == 0);;
+
+let timeit f a =
+  let t0 = Unix.gettimeofday() in
+    ignore (f a);
+  let t1 = Unix.gettimeofday() in
+    t1 -. t0;;
+
+let () =printf  "timeit euler_totient 10090: %F\n" (timeit euler_totient 10090);;
+let () =printf  "timeit euler_totient_improved 10090: %F\n" (timeit euler_totient_improved 10090);;
+
+(* 39. A list of prime numbers. (easy)
+Given a range of integers by its lower and upper limit, construct a list of all prime numbers in that range. *)
+
+(*  todo generator + filter + Predicate *)
+let all_primes low high =
+  let rec iter acc n = 
+    let cp = compare n high in
+    match cp with
+    | 1 -> acc 
+    | _ -> iter (if is_prime n then (n::acc)else acc) (n+1) in
+  iter [] low |> List.rev
+
+let () = assert (compare (List.length (all_primes 2 7920)) 1000 == 0)
+
+let goldbach_conjecture n = 
+  let primes = all_primes 2 n in
+  let rec find_pair lst rlst=
+  match lst,rlst with 
+  | [],_ -> failwith "no pair"
+  | _,[] -> failwith "no pair"
+  | x::xs,y::ys -> 
+    if (x+y==n) then (x,y) 
+    else if (x+y>n) then find_pair lst ys
+    else find_pair xs rlst 
+    in 
+    find_pair primes (List.rev primes)
+
+let () = assert (compare (goldbach_conjecture 28) (5,23) == 0);;
+let () = assert (compare (goldbach_conjecture 13) (2,11) == 0);;
+let () = assert (compare (goldbach_conjecture 5) (2,3) == 0);;
+
+let is_even n =
+  n mod 2 == 0;;
+
+let goldbach_compositions low high=
+  let rec iter acc n = 
+    let cp = compare n high in
+    match cp with
+    | 1 -> acc 
+    | _ -> iter (if is_even n then ((n,goldbach_conjecture(n))::acc)else acc) (n+1) in
+  iter [] low |> List.rev
+
+let () = assert (compare 
+(goldbach_compositions 9 20)
+[(10, (3, 7)); (12, (5, 7)); (14, (3, 11)); (16, (3, 13)); (18, (5, 13));(20, (3, 17))]
+== 0)
+    

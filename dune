@@ -1,4 +1,4 @@
 (executable
  (name Ocaml99)
-  (libraries stdio))
+  (libraries unix stdio))
 
