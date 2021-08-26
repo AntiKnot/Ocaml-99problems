@@ -794,11 +794,64 @@ let gray n =
 let () = assert (compare (gray 3) ["000";"001";"010";"011";"100";"101";"110";"111"] == 0);;
 
 (* 50. Huffman code (hard) *)
-(* https://en.wikipedia.org/wiki/Huffman_coding *)
-(* todo *)
+(* https://en.wikipedia.org/wiki/Huffman_coding
+https://zh.wikipedia.org/wiki/%E9%9C%8D%E5%A4%AB%E6%9B%BC%E7%BC%96%E7%A0%81#%E6%BC%94%E7%AE%97%E9%81%8E%E7%A8%8B *)
 
+(* Huffman Tree *)
+  (* symbol frequency left right rank  *)
+type 'a hf = Empty | Node of 'a * int * 'a hf * 'a hf * int;; 
 
+(* s symbol; f frequency; *)
+let singleton s f = Node (s, f, Empty, Empty, 0);;
+
+let rec merge n1 n2=
+  match n1,n2 with
+  | Node (_,f1,_,_,_),Node(_,f2,_,_,_) when f1 > f2 -> merge n2 n1 
+  | Node (s1,f1,_,_,k1),Node(_,f2,_,_,_) -> Node (s1,f1+f2,n1,n2,k1) 
+  | Empty, Node (s2,f2,_,_,k2) -> Node (s2,f2,n1,n2,k2)
+  | Node (s1,f1,_,_,k1), Empty -> Node (s1,f1,n1,n2,k1)
+  | _,_ -> failwith "merge error";;
+
+(* compare *)
+let cmp n1 n2= 
+  match n1,n2 with
+  | Node (_,f1,_,_,_), Node (_,f2,_,_,_) -> f1 - f2
+  | _ -> failwith "cmp error";;
+(* sort *)
+let sort arr= List.sort cmp arr;;
+  (* lst [(s0,f0);(s1;f1);(s2;f2)] *)
+let huffman_nodes lst = 
+  let trans = function
+  | (s,f) -> Node (s,f,Empty,Empty,0) 
+  in
+  List.map trans lst;;
+let build_hf lst = 
+  let rec bhf lst = 
+    match lst with
+    | [] -> Empty
+    | [root] -> root
+    | h1::h2::tl -> bhf ((merge h1 h2)::tl |>sort) in
+    bhf (lst|> huffman_nodes |>sort);;
+(* 
+utop # let fs = [("a", 45); ("b", 13); ("c", 12); ("d", 16); ("e", 9); ("f", 5)];;
+val fs : (string * int) list = [("a", 45); ("b", 13); ("c", 12); ("d", 16); ("e", 9); ("f", 5)]
+utop # build_hf fs;;
+- : string hf =
+Node ("a", 100, Node ("a", 45, Empty, Empty, 0),
+ Node ("c", 55,
+  Node ("c", 25, Node ("c", 12, Empty, Empty, 0),
+   Node ("b", 13, Empty, Empty, 0), 0),
+  Node ("f", 30,
+   Node ("f", 14, Node ("f", 5, Empty, Empty, 0),
+    Node ("e", 9, Empty, Empty, 0), 0),
+   Node ("d", 16, Empty, Empty, 0), 0),
+  0),
+ 0)
+ *)
 
 (* 55. Construct completely balanced binary trees. (medium) *)
+(* https://en.wikipedia.org/wiki/Binary_tree *)
 
-
+type 'a binary_tree =
+    | Empty
+    | Node of 'a * 'a binary_tree * 'a binary_tree;;
