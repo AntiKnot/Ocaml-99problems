@@ -721,3 +721,84 @@ let () = assert (compare
 [(10, (3, 7)); (12, (5, 7)); (14, (3, 11)); (16, (3, 13)); (18, (5, 13));(20, (3, 17))]
 == 0)
     
+(* ------------------------- *)
+(* 46 & 47. Truth tables for logical expressions (2 variables). (medium) *)
+
+type bool_expr =
+    | Var of string
+    | Not of bool_expr
+    | And of bool_expr * bool_expr
+    | Or of bool_expr * bool_expr;;
+
+let rec eval a value_a b value_b = function
+  | Var x when x = a -> value_a
+  | Var x when x = b -> value_b
+  | Var _ -> failwith "undefined variable"
+  | Not expr -> not (eval a value_a b value_b expr)
+  | And (expr1,expr2) -> (eval a value_a b value_b expr1) && (eval a value_a b value_b expr2)
+  | Or (expr1,expr2) -> (eval a value_a b value_b expr1) || (eval a value_a b value_b expr2);;
+
+let table2 a b expr = 
+  [
+    (true,true,eval a true b true expr),
+    (true,false,eval a true b false expr),
+    (false,true,eval a false b true expr),
+    (false,false,eval a false b false expr)
+  ];;
+  
+let _ = table2 "a" "b" (And(Var "a", Or(Var "a", Var "b")));;
+
+(* 48. Truth tables for logical expressions. (medium) *)
+
+(* https://ocaml.org/api/List.html#:~:text=Since%204.12.0-,Association%20lists,-val%20assoc%20%3A%20%27a 
+[(k,v),(k,v)]中通过k找到v的方法。虽然是O(n)，但是hashtable要怎么做pattern matching？ 获取剩余的kv对
+*)
+(* let rec assoc x = function
+    [] -> raise Not_found
+  | (a,b)::l -> if compare a x = 0 then b else assoc x l *)
+
+let rec eval val_vars = function
+  | Var x -> List.assoc x val_vars
+  | Not e -> not (eval val_vars e)
+  | And (e1,e2) -> (eval val_vars e1) && (eval val_vars e2)
+  | Or (e1,e2) -> (eval val_vars e1) || (eval val_vars e2);;
+
+let rec table_make val_vars vars expr =
+  match vars with
+  | [] -> [List.rev val_vars, eval val_vars expr]
+  | v::tl -> 
+      table_make ((v,true) :: val_vars) tl expr 
+    @ table_make ((v,false):: val_vars) tl expr;;
+
+let table vars expr = table_make [] vars expr;;
+
+(* 49. Gray code. (medium) *)
+
+(* https://ocaml.org/api/Buffer.html#:~:text=encoding%20of%20integers-,Module%20Buffer,-module%20Buffer%3A%20sig 
+使用buffer可以避免拼接字符串更高效节约内存，避免内存拷贝和新建字符串。
+*)
+
+let string_of_list l =
+  let buf = Buffer.create 8 in
+  let rec sol = function
+  | [] -> Buffer.contents buf
+  | hd::tl -> (Buffer.add_string buf (string_of_int hd); sol tl)
+  in sol l
+
+let gray n =
+  let rec  gray' acc i =
+  if i > n then acc 
+  else gray' ((List.map (fun x->0::x) acc)@(List.map (fun x->1::x) acc)) (i+1) in
+  gray' [[0];[1]] 2 |> List.map string_of_list;;
+
+let () = assert (compare (gray 3) ["000";"001";"010";"011";"100";"101";"110";"111"] == 0);;
+
+(* 50. Huffman code (hard) *)
+(* https://en.wikipedia.org/wiki/Huffman_coding *)
+(* todo *)
+
+
+
+(* 55. Construct completely balanced binary trees. (medium) *)
+
+
