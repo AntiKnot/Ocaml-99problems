@@ -777,13 +777,12 @@ let table vars expr = table_make [] vars expr;;
 (* https://ocaml.org/api/Buffer.html#:~:text=encoding%20of%20integers-,Module%20Buffer,-module%20Buffer%3A%20sig 
 使用buffer可以避免拼接字符串更高效节约内存，避免内存拷贝和新建字符串。
 *)
-
 let string_of_list l =
   let buf = Buffer.create 8 in
   let rec sol = function
   | [] -> Buffer.contents buf
   | hd::tl -> (Buffer.add_string buf (string_of_int hd); sol tl)
-  in sol l
+  in sol l;;
 
 let gray n =
   let rec  gray' acc i =
@@ -796,24 +795,21 @@ let () = assert (compare (gray 3) ["000";"001";"010";"011";"100";"101";"110";"11
 (* 50. Huffman code (hard) *)
 (* https://en.wikipedia.org/wiki/Huffman_coding
 https://zh.wikipedia.org/wiki/%E9%9C%8D%E5%A4%AB%E6%9B%BC%E7%BC%96%E7%A0%81#%E6%BC%94%E7%AE%97%E9%81%8E%E7%A8%8B *)
-
 (* Huffman Tree *)
-  (* symbol frequency left right rank  *)
+  (* s symbol f frequency l left r right k rank *)
 type 'a hf = Empty | Node of 'a * int * 'a hf * 'a hf * int;; 
-
-(* s symbol; f frequency; *)
-let singleton s f = Node (s, f, Empty, Empty, 0);;
-
+let mark k= function
+| Empty -> Empty
+| Node (s,f,l,r,_) -> Node (s,f,l,r,k);;
 let rec merge n1 n2=
   match n1,n2 with
+  | Empty, Node (s2,f2,_,_,_) -> Node (s2,f2,n1,n2,-1)
+  | Node (s1,f1,_,_,_), Empty -> Node (s1,f1,n1,n2,-1)
   | Node (_,f1,_,_,_),Node(_,f2,_,_,_) when f1 > f2 -> merge n2 n1 
-  | Node (s1,f1,_,_,k1),Node(_,f2,_,_,_) -> Node (s1,f1+f2,n1,n2,k1) 
-  | Empty, Node (s2,f2,_,_,k2) -> Node (s2,f2,n1,n2,k2)
-  | Node (s1,f1,_,_,k1), Empty -> Node (s1,f1,n1,n2,k1)
+  | Node (s1,f1,_,_,_),Node(_,f2,_,_,_) -> Node (s1,f1+f2,(mark 0 n1),(mark 1 n2),-1) 
   | _,_ -> failwith "merge error";;
-
 (* compare *)
-let cmp n1 n2= 
+let cmp n1 n2 = 
   match n1,n2 with
   | Node (_,f1,_,_,_), Node (_,f2,_,_,_) -> f1 - f2
   | _ -> failwith "cmp error";;
@@ -832,22 +828,31 @@ let build_hf lst =
     | [root] -> root
     | h1::h2::tl -> bhf ((merge h1 h2)::tl |>sort) in
     bhf (lst|> huffman_nodes |>sort);;
-(* 
-utop # let fs = [("a", 45); ("b", 13); ("c", 12); ("d", 16); ("e", 9); ("f", 5)];;
-val fs : (string * int) list = [("a", 45); ("b", 13); ("c", 12); ("d", 16); ("e", 9); ("f", 5)]
-utop # build_hf fs;;
-- : string hf =
-Node ("a", 100, Node ("a", 45, Empty, Empty, 0),
- Node ("c", 55,
-  Node ("c", 25, Node ("c", 12, Empty, Empty, 0),
-   Node ("b", 13, Empty, Empty, 0), 0),
-  Node ("f", 30,
-   Node ("f", 14, Node ("f", 5, Empty, Empty, 0),
-    Node ("e", 9, Empty, Empty, 0), 0),
-   Node ("d", 16, Empty, Empty, 0), 0),
-  0),
- 0)
- *)
+(* Traversal *)
+let trav hf =
+  let rec trav' acc path hf = 
+  match hf with
+  | Empty -> [] 
+  | Node (s,_,Empty,Empty,k) -> (s,k::path)::acc
+  | Node (_,_,l,r,k) -> trav' acc (k::path) l @ trav' acc (k::path) r in
+  trav' [] [] hf;;
+let string_of_list_ingore_sentinel l =
+  let buf = Buffer.create 8 in
+  let rec sol = function
+  | [] -> Buffer.contents buf
+  | [_] -> Buffer.contents buf
+  | hd::tl -> (Buffer.add_string buf (string_of_int hd); sol tl)
+  in sol l;;
+(* integer list to string *)
+let string_of_code lst =
+  lst|>List.map (fun (x,l)->(x,string_of_list_ingore_sentinel l));;
+let huffman lst = 
+  build_hf lst |>trav|>string_of_code;;
+
+let () = assert (compare 
+(huffman [("a", 45); ("b", 13); ("c", 12); ("d", 16); ("e", 9); ("f", 5)])
+[("a", "0"); ("c", "001"); ("b", "101"); ("f", "0011"); ("e", "1011"); ("d", "111")]
+== 0);;
 
 (* 55. Construct completely balanced binary trees. (medium) *)
 (* https://en.wikipedia.org/wiki/Binary_tree *)
