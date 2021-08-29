@@ -887,4 +887,27 @@ let is_symmetric = function
   | Empty -> true
   | Node (_,l,r) -> is_mirror l r;; 
 
-(* 57 *)
+(* 57 https://en.wikipedia.org/wiki/Binary_search_tree*)
+(* 构建一个持续添加的结构， insert + fold  *)
+let rec insert t x =
+  match t with
+  | Empty -> Node (x,Empty,Empty)
+  | Node (y,l,r) -> 
+    if x = y then t
+    else if x < y then Node (y,insert l x,r)
+    else Node (y,l,insert r x);;
+  
+let construct l= List.fold_left insert Empty l;;
+
+let () = assert (compare (is_symmetric (construct [5; 3; 18; 1; 4; 12; 21])) true == 0);;
+
+(* 58. Generate-and-test paradigm. (medium) *)
+let sym_cbal_trees n =
+  List.filter is_symmetric (cbal_tree n);;
+
+let () = assert (compare
+  (List.length (sym_cbal_trees 57))
+  (256)
+  == 0);;
+
+
