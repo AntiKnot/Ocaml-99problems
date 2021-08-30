@@ -1029,3 +1029,45 @@ let bottom_up t =
   (['g'; 'f'; 'c'; 'd'; 'e'; 'b'; 'a'])
   ==0);;
 
+(* Graphs *)
+(* 80. Conversions. (easy) *)
+
+(* 81. Path from one node to another one. (medium) *)
+
+(* 82. Cycle from a given node. (easy) *)
+
+(* 83. Construct all spanning trees. (medium) *)
+
+(* 84. Construct the minimal spanning tree. (medium) *)
+
+(* 85. Graph isomorphism. (medium) *)
+
+(* 86. Node degree and graph coloration. (medium) *)
+
+(* 87. Depth-first order graph traversal. (medium) *)
+
+(* 88. Connected components. (medium) *)
+
+(* 89. Bipartite graphs. (medium) *)
+
+(* 90. Generate K-regular simple graphs with N nodes. (hard) *)
+
+(* Miscellaneous Problems *)
+
+(* 91. Eight queens problem. (medium) *)
+
+(* 92. Knight's tour. (medium) *)
+
+(* 93. Von Koch's conjecture. (hard) *)
+
+(* 94. An arithmetic puzzle. (hard) *)
+
+(* 95. English number words. (medium) *)
+
+(* 96. Syntax checker. (medium) *)
+
+(* 97. Sudoku. (medium) *)
+
+(* 98. Nonograms. (hard) *)
+
+(* 99. Crossword puzzle. (hard) *)
