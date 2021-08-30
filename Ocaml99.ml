@@ -653,7 +653,10 @@ let item (p,m) =
 let rec accumulate f acc sequence =
   match sequence with
   | [] -> acc
-  | x::xs -> f x (accumulate f acc xs);;
+  (* fold_right
+  | x::xs -> f x (accumulate f acc xs);; *)
+  (* fold_left *)
+  | x::xs -> accumulate f (f acc x ) xs
 
 let product_series lst = 
   accumulate ( * ) 1 lst;;
@@ -911,3 +914,87 @@ let () = assert (compare
   == 0);;
 
 
+let rec hbal_tree n =
+  if n == 0 then [Empty] 
+  else if n =  1 then [Node ("x",Empty,Empty)]
+  else 
+    let t1 = hbal_tree (n-1) in
+    let t2 = hbal_tree (n-2) in
+    add_trees_with t1 t1 (add_trees_with t1 t2 (add_trees_with t2 t1 []))
+
+(* 60. Construct height-balanced binary trees with a given number of nodes. (medium) *)
+
+(* 61. Count the leaves of a binary tree. (easy) *)
+let rec count_leaves = function 
+| Empty -> 0 
+| Node (_,Empty,Empty) -> 1
+| Node (_,l,r) -> (count_leaves l) + (count_leaves r);;
+
+let ()  = assert (compare 
+  (count_leaves Empty) 
+  (0)
+  == 0);;
+
+let () = assert (compare 
+  (count_leaves (Node('x', Node ('x',Empty,Empty), Node ('x',Empty,Empty))))
+  (2)
+  == 0);;
+
+(* 61A. Collect the leaves of a binary tree in a list. (easy) *)
+let leaves t = 
+  let rec leaves' acc t = match t with
+    | Empty -> []
+    | Node (x,Empty,Empty) -> x::acc
+    | Node (_,l,r) -> leaves' (leaves' acc r) l in
+    leaves' [] t
+
+let () = assert (compare
+  (leaves (Node('x', Node ('x',Empty,Empty), Node ('x',Empty,Empty))))
+  (['x';'x'])
+  == 0);;
+
+(* 62. Collect the internal nodes of a binary tree in a list. (easy) *)
+let internals t = 
+  let rec internals' acc t = match t with
+    | Empty -> []
+    | Node (x,Empty,Empty) -> x::acc
+    | Node (x,l,r) ->x:: internals' (internals' acc r) l in
+    internals' [] t
+
+  let () = assert (compare
+  (internals (Node('x', Node ('x',Empty,Empty), Node ('x',Empty,Empty))))
+  (['x';'x';'x'])
+  == 0);;
+
+(* 62B. Collect the nodes at a given level in a list. (easy) *)
+let at_level t n = 
+  let rec at_level' acc t n = match t,n with
+    | _,0 -> []
+    | Empty,_ -> []
+    | Node (x,_,_),1-> x::acc
+    | Node (_,l,r),n-> at_level' (at_level' acc r (n-1)) l (n-1) 
+  in
+  at_level' [] t n;;
+
+let () = assert (compare
+(at_level (Node('x', Node ('y',Empty,Empty), Node ('z',Empty,Empty))) 1)
+(['x'])
+== 0);;
+let () = assert (compare
+(at_level (Node('x', Node ('y',Empty,Empty), Node ('z',Empty,Empty))) 2)
+(['y';'z'])
+== 0);;
+
+(* --------------------------------------------- *)
+
+type 'a mult_tree = T of 'a * 'a mult_tree list;;
+(* 70C. Count the nodes of a multiway tree. (easy) *)
+
+let rec count_nodes t  =
+match t with
+| T (_,lst) -> accumulate (fun n t -> n + (count_nodes t)) 1 lst;;
+
+let () = assert (compare
+(count_nodes (T ('a', [T ('f', []) ])))
+(2)
+==0);;
