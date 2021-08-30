@@ -998,3 +998,34 @@ let () = assert (compare
 (count_nodes (T ('a', [T ('f', []) ])))
 (2)
 ==0);;
+
+(* 70. Tree construction from a node string. (medium) *)
+
+(* 71. Determine the internal path length of a tree. (easy) *)
+let internal_path_length t= 
+let rec foo deep t =
+  match t with
+  (* 每递归下一层+ 1 *)
+  | T (_,lst) -> accumulate (fun n t -> n + (foo (deep + 1) t)) deep lst
+in foo 0 t;;
+
+let () = assert (compare
+(internal_path_length (T ('a', [T ('f', [T ('g', [])]); T ('c', []);
+T ('b', [T ('d', []); T ('e', [])])])))
+(9)
+==0);;
+
+(* 72. Construct the bottom-up order sequence of the tree nodes. (easy) *)
+(* https://stackoverflow.com/a/24370977/10217249 *)
+let bottom_up t =
+  let rec foo t l = match t with
+    | T (x,lst) -> List.fold_right (fun t acc -> foo t acc) lst (x::l)
+  in
+  foo t [];;
+
+  let () = assert (compare
+  (bottom_up (T ('a', [T ('f', [T ('g', [])]); T ('c', []);
+  T ('b', [T ('d', []); T ('e', [])])])))
+  (['g'; 'f'; 'c'; 'd'; 'e'; 'b'; 'a'])
+  ==0);;
+
