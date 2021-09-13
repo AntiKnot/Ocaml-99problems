@@ -5,6 +5,10 @@ let rec print_n_list = function
 let rec print_s_list = function 
   [] -> ()
   | e::l -> printf "%S" e ; print_string " " ; print_s_list l
+
+let rec print_c_list = function
+  [] ->()
+  | e::l -> printf "%c" e ; print_string " " ; print_c_list l
 (* 1. Write a function last : 'a list -> 'a option that returns the last element of a list. (easy)*)
 
 let rec last = function
@@ -1000,6 +1004,34 @@ let () = assert (compare
 ==0);;
 
 (* 70. Tree construction from a node string. (medium) *)
+(* 49. 中使用了Buffer处理字符串拼接 
+let string_of_list l =
+  let buf = Buffer.create 8 in
+  let rec sol = function
+  | [] -> Buffer.contents buf
+  | hd::tl -> (Buffer.add_string buf (string_of_int hd); sol tl)
+  in sol l;; *)
+
+(* Preorder traversal *)
+(* let list_of_tree (T (_,sub)) =
+  accumulate (fun acc t -> t::acc) [] sub;;
+
+let () = assert (compare
+(list_of_tree (T ('a', [T ('f', [T ('g', [])]); T ('c', []);
+T ('b', [T ('d', []); T ('e', [])])])))
+([])
+==0);; *)
+
+(* let rec add_string_of_tree buf (T (c,sub)) = 
+  Buffer.add_char buf c;
+  List.iter (add_string_of_tree buf) sub;
+  Buffer.add_char buf '^'
+
+let string_of_tree t = 
+  let buf = Buffer.create 128 in
+  add_string_of_tree buf t;
+  Buffer.contents buf;; *)
+
 
 (* 71. Determine the internal path length of a tree. (easy) *)
 let internal_path_length t= 
@@ -1030,9 +1062,84 @@ let bottom_up t =
   ==0);;
 
 (* Graphs *)
+(* ocaml 的类型定义不支持嵌套嘛 *)
+type 'a edge = ('a * 'a);;
+(* [('h', 'g'); ('k', 'f'); ('f', 'b'); ('f', 'c'); ('c', 'b')] *)
+type 'a edge_clause = ('a * 'a) list;;
+(* {nodes = ['b'; 'c'; 'd'; 'f'; 'g'; 'h'; 'k'];
+   edges = [('h', 'g'); ('k', 'f'); ('f', 'b'); ('f', 'c'); ('c', 'b')]} *)
+type 'a graph_term = {nodes : 'a list;  edges : ('a * 'a) list};;
+(* https://www.boost.org/doc/libs/1_37_0/libs/graph/doc/adjacency_list.html *)
+(* [('h',['g']);('k',['f']);('f',['b','c']);('c',['b'])] *)
+type 'a adjacency_list = ('a * ('a list)) list;;
+(* "b-c f-c g-h d f-b k-f h-g" *)
+type human_friendly = string;;
+
 (* 80. Conversions. (easy) *)
+let neighbors g a = 
+  let edges= g.edges in 
+  let rec edge l  edges= 
+  match edges with
+  | [] -> l
+  | (x,y)::tl ->
+    if x = a then edge (y::l)  tl 
+    else if y = a then edge (x::l) tl
+    else edge l tl in 
+    edge [] edges;;
+let term2adjacency g = 
+  List.map (fun c -> (c,neighbors g c)) g.nodes;;
+
+let split_edges (elem:(char * char list))= 
+  match elem with
+  | (_,[]) -> []
+  | (x,xs) -> List.map (fun y -> (x,y)) xs;;
+
+let term_append (terms:(char * char)list) term = 
+  match term with
+  | (x,y) -> 
+    if List.mem (x,y) terms || List.mem (y,x) terms then terms
+    else (x,y)::terms;;
+
+let adj2terms g= 
+    let rec iter acc g = 
+      match g with
+      | [] -> acc
+      | hd::tl -> iter (acc@(split_edges hd)) tl in
+      iter [] g;;
+
+let adjacency2term g = 
+  let rec iter acc terms = 
+    match terms with
+    | [] -> acc
+    | hd::tl -> iter (term_append acc hd) tl in
+  iter [] (adj2terms g);;
+
 
 (* 81. Path from one node to another one. (medium) *)
+
+
+let rec list_path g (a:char) (to_b : char list) : char list list= 
+  match to_b with
+  | [] -> assert false
+  | x::_ -> 
+    if x = a then [to_b]
+    else 
+      let n = neighbors g x in 
+      let a_n =List.filter (fun c -> (not (List.mem c to_b))) n in 
+      List.concat (List.map (fun c -> list_path g a (c :: to_b)) a_n);;
+
+let paths g (a:char) (b:char) = 
+  list_path g a [b];;
+
+let () = assert (compare
+(paths {nodes = ['b'; 'c'; 'd'; 'f'; 'g'; 'h'; 'k'];
+edges = [('h', 'g'); ('k', 'f'); ('f', 'b'); ('f', 'c'); ('c', 'b')]}'f' 'c')
+([['f'; 'b'; 'c']; ['f'; 'c']]) == 0);;
+
+
+(* Find all possible paths from one node to another in Graph
+ https://www.youtube.com/watch?v=TrEloQBv7WQ *)
+
 
 (* 82. Cycle from a given node. (easy) *)
 
