@@ -1142,8 +1142,20 @@ edges = [('h', 'g'); ('k', 'f'); ('f', 'b'); ('f', 'c'); ('c', 'b')]}'f' 'c')
 
 
 (* 82. Cycle from a given node. (easy) *)
+(* 从该顶点到邻接定点的所有路径 append 该顶点 *)
+let cycles (g: 'a graph_term) (a:char) : (char list) list =
+  let n = neighbors g a in
+  let paths = List.concat (List.map (fun c -> list_path g a [c]) n) in
+  List.map(fun p -> p @ [a]) paths;;
 
 (* 83. Construct all spanning trees. (medium) *)
+(* https://en.wikipedia.org/wiki/Spanning_tree *)
+(* https://zh.wikipedia.org/zh-sg/%E7%94%9F%E6%88%90%E6%A0%91%E5%8D%8F%E8%AE%AE *)
+(* https://zh.wikipedia.org/wiki/%E7%94%9F%E6%88%90%E6%A0%91 *)
+(* https://stackoverflow.com/questions/2935754/all-minimum-spanning-trees-implementation *)
+(* http://people.csail.mit.edu/rivest/mst.py *)
+(* https://www.scielo.br/j/pope/a/XHswBwRwJyrfL88dmMwYNWp/?format=pdf&lang=en *)
+(* let s_tree g =  *)
 
 (* 84. Construct the minimal spanning tree. (medium) *)
 
