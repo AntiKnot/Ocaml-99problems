@@ -1174,6 +1174,25 @@ let cycles (g: 'a graph_term) (a:char) : (char list) list =
 (* Miscellaneous Problems *)
 
 (* 91. Eight queens problem. (medium) *)
+let matrix m n = 
+  let range_m = range 1 m in
+  let range_n = range 1 n in
+  List.map (fun x -> List.map (fun y -> (x,y)) range_n) range_m;;
+let board n = 
+  matrix n n;;
+let is_safe (x1,y1) (x2,y2) = 
+  x1 <> x2 && y1 <> y2 && x1-x2 <> y1-y2 && x1-y2 <> x2-y1;;
+let check p placed =  
+  List.for_all (fun x -> (is_safe p) x) placed;;
+let solve n = 
+  let rec sols chess_board placed =
+    match chess_board with
+    | [] -> [placed]
+    | row::rows -> 
+      let safe_positions = List.filter (fun p -> check p placed) row in
+      List.concat (List.map (fun p -> sols rows (p::placed)) safe_positions) in
+  sols (board n) [] ;;
+
 
 (* 92. Knight's tour. (medium) *)
 
