@@ -1174,6 +1174,7 @@ let cycles (g: 'a graph_term) (a:char) : (char list) list =
 (* Miscellaneous Problems *)
 
 (* 91. Eight queens problem. (medium) *)
+(* structure data->split M task -> [result1,....reesultM] *)
 let matrix m n = 
   let range_m = range 1 m in
   let range_n = range 1 n in
@@ -1195,6 +1196,52 @@ let solve n =
 
 
 (* 92. Knight's tour. (medium) *)
+(* https://en.wikipedia.org/wiki/Knight%27s_tour *)
+(* https://zh.wikipedia.org/wiki/%E9%A8%8E%E5%A3%AB%E5%B7%A1%E9%82%8F *)
+let board n = 
+  Array.make_matrix n n 0;;
+
+(* 
+structure all path if one Meet the criteria, stop search. => early return
+ *)
+let knight_moves = 
+  [(2,1);(1,2);(-1,2);(-2,1);(-2,-1);(-1,-2);(1,-2);(2,-1)];;
+let move (x,y) (v_x,v_y) = 
+  (x+v_x,y+v_y);;
+let is_onboard (x,y) = 
+  x>=1 && x<=8 && y>=1 && y<=8;;
+let next_positions (x,y) = 
+  List.filter is_onboard (List.map (fun p -> move (x,y) p) knight_moves);;
+let board n = 
+  Array.make_matrix n n 0;;
+
+let is_tour b (x,y) = 
+  b.(x).(y) == 0;;
+
+let is_path  n path =
+  List.length path == n*n;;
+  
+let rec do_until f = function
+| [] -> []
+| h::t -> match f h with
+          | [] -> do_until f t
+          | answer -> answer;;
+let knight_tour n (x,y) = 
+  let b = board n in
+  let steps = n*n in
+  let rec next path w b (x,y) steps= 
+    match steps with
+    | 0 -> [path]
+    | _ -> let positions =  next_positions (x,y) in 
+        List.concat (List.map (fun p -> 
+          if is_tour b (x,y) then 
+             next (p::path) (b.(x).(y)<-1) b p (steps-1)
+          else next path (b.(x).(y)<-0) b p 0) positions) in
+  next [] () b (x,y) steps;;
+let knight_path all_path n =
+  List.filter (is_path n) all_path;;
+
+
 
 (* 93. Von Koch's conjecture. (hard) *)
 
