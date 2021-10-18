@@ -1204,8 +1204,6 @@ let board n =
 (* 
 structure all path if one Meet the criteria, stop search. => early return
  *)
-let is_safe (x1,y1) (x2,y2) = 
-  x1 <> x2 && y1 <> y2 && x1-x2 <> y1-y2 && x1-y2 <> x2-y1;;
 let knight_moves = 
   [(2,1);(1,2);(-1,2);(-2,1);(-2,-1);(-1,-2);(1,-2);(2,-1)];;
 let add (x,y) (v_x,v_y) = 
@@ -1215,27 +1213,22 @@ let is_on_board (x,y) =
 let moves (x,y) = 
   List.filter is_on_board (List.map (fun p -> add (x,y) p) knight_moves);;
 let allow_moves p placed = 
-  List.filter (fun x -> (is_safe p) x) placed;; 
+  List.filter (fun b -> not (List.mem b placed)) (moves p);;
 let comp solution p1 p2 =
-  (List.length (allow_moves p1 solution)) - List.length (allow_moves p2 solution);;
+  List.length (allow_moves p1 solution) - List.length (allow_moves p2 solution);;
 let sorted_moves solution = 
-  match solution with
-  | [] -> failwith "error"
-  | x::xs -> List.sort (comp solution) (allow_moves x xs);;
-
+  List.sort (comp solution) (allow_moves (List.hd solution) (List.tl solution));;
 let rec do_until f = function
   | [] -> []
-  | h::t -> match f h with
-    | [] -> h::(do_until f t)
-    | _ -> (do_until f t);;
-
-let rec extend start len soln = 
-  if len == 64
+  | hd::tl -> match f hd with
+    | [] -> do_until f tl
+    | answer -> answer;;
+let rec extend1 start len soln =
+  if (len == 64)
     then soln
-  else 
-    do_until 
-    (fun b -> extend start (len+1) (b::soln)) 
-    (sorted_moves soln);;
+  else
+    do_until (fun b -> extend1 start (len+1) (b::soln)) (sorted_moves soln);;
+let extend start = extend1 start 1 [start];;
 
 (* 93. Von Koch's conjecture. (hard) *)
 
