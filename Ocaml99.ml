@@ -1235,6 +1235,48 @@ let extend start = extend1 start 1 [start];;
 (* 94. An arithmetic puzzle. (hard) *)
 
 (* 95. English number words. (medium) *)
+let n2l n =
+  let rec iter aucc n =
+    match n with
+    | 0 -> aucc
+    | x -> iter ((x mod 10)::aucc) (x/10) 
+  in
+  iter [] n;;
+
+let digit_alist = 
+  [
+    0,"zero";1,"one";2,"two";3,"three";4,"four";
+    5,"five";6,"six";7,"seven";8,"eight";9,"nine";
+  ];;
+
+let n2w n =
+  let rec iter n alist = 
+    match alist with
+    | [] -> failwith "error digit"
+    | (x,y)::tl -> if x == n then y else iter n tl 
+  in
+  iter n digit_alist;;
+
+let full_number n  = 
+  let dlist = n2l n in
+  let wlist = List.map n2w dlist in
+  String.concat "-" wlist;;
+
+
+(* let full_number n = 
+  let rec full_number_rec n = 
+    match n with
+    | 0 -> "zero"
+    | 1 -> "one"
+    | 2 -> "two"
+    | 3 -> "three"
+    | 4 -> "four"
+    | 5 -> "five"
+    | 6 -> "six"
+    | 7 -> "seven"
+    | 8 -> "eight"
+    | 9 -> "nine"
+    | _ -> failwith "not number" *)
 
 (* 96. Syntax checker. (medium) *)
 
