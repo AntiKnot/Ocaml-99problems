@@ -1263,6 +1263,8 @@ let full_number n  =
   String.concat "-" wlist;;
 
 (* 96. Syntax checker. (medium) *)
+(* i.e. which are purely recursive.
+ Not fully meet the requirements, can only be said to be barely achieved. *)
 let explode s =
   let rec exp i l =
     if i < 0 then l else exp (i - 1) (s.[i] :: l) in
