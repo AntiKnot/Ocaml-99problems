@@ -1262,23 +1262,33 @@ let full_number n  =
   let wlist = List.map n2w dlist in
   String.concat "-" wlist;;
 
-
-(* let full_number n = 
-  let rec full_number_rec n = 
-    match n with
-    | 0 -> "zero"
-    | 1 -> "one"
-    | 2 -> "two"
-    | 3 -> "three"
-    | 4 -> "four"
-    | 5 -> "five"
-    | 6 -> "six"
-    | 7 -> "seven"
-    | 8 -> "eight"
-    | 9 -> "nine"
-    | _ -> failwith "not number" *)
-
 (* 96. Syntax checker. (medium) *)
+let explode s =
+  let rec exp i l =
+    if i < 0 then l else exp (i - 1) (s.[i] :: l) in
+  exp (String.length s - 1) []
+
+let lexical_analysis char_list =
+  let rec iter acc flag char_list = 
+    match char_list with 
+    | [] -> acc
+    | hd::tl -> 
+      if hd == '-' then iter (acc@[0]) true tl
+      else 
+        if flag == true then iter (acc@[1]) false tl
+        else iter acc false tl
+  in
+  iter [] true char_list
+
+let encode tokens = 
+  let rec iter flag tokens = 
+  match flag,tokens with
+  | flag,[] -> if flag == 1 then true else false
+  | flag,hd :: tl -> if flag <> hd then iter hd tl else false in 
+  iter 0 tokens
+
+let checker s =
+  s |> explode |> lexical_analysis |> encode 
 
 (* 97. Sudoku. (medium) *)
 
