@@ -14,8 +14,8 @@ jobs:
       matrix:
         os:
           - macos-latest
-          - ubuntu-latest
-          - windows-latest
+#           - ubuntu-latest
+#           - windows-latest
         ocaml-compiler:
           - 4.13.x
 
@@ -33,6 +33,8 @@ jobs:
       - run: opam install . --deps-only --with-test
       
       - run: opam install dune
+      
+      - run: opam install stdio
       
       - run: opam exec -- dune build
 
