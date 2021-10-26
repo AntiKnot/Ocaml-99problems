@@ -1377,5 +1377,11 @@ let initial_board =
 Board.print (sudoku initial_board);;
 
 (* 98. Nonograms. (hard) *)
+(* https://link.springer.com/article/10.1007/s10489-009-0200-0 *)
+(* https://stackoverflow.com/questions/813366/solving-nonograms-picross *)
+(* https://stackoverflow.com/questions/34469538/efficient-nonogram-solver *)
+(* https://stackoverflow.com/questions/22966277/evolution-algorithm-to-solve-nonograms *)
+(* https://stackoverflow.com/questions/47159012/recursive-algorithm-to-find-all-possible-solutions-in-a-nonogram-row *)
+(* https://stackoverflow.com/questions/67180793/implementing-an-algorithm-to-check-a-nonogram-solution *)
 
 (* 99. Crossword puzzle. (hard) *)
